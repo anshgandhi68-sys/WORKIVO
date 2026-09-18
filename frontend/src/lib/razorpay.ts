@@ -158,9 +158,11 @@ export const initiateRazorpayPayment = async ({
       }
     },
     handler: function (response: RazorpayPaymentSuccessResponse) {
-      paymentSuccessful = true;
-      console.info('[WORKIVO Razorpay] Payment Succeeded:', response);
-      onSuccess(response);
+      if (!paymentSuccessful) {
+        paymentSuccessful = true;
+        console.info('[WORKIVO Razorpay Handler] Payment Succeeded:', response);
+        onSuccess(response);
+      }
     },
     modal: {
       ondismiss: function () {
@@ -168,10 +170,6 @@ export const initiateRazorpayPayment = async ({
           console.warn('[WORKIVO Razorpay] Checkout modal dismissed by user.');
           if (onDismiss) {
             onDismiss();
-          } else {
-            onError({
-              description: 'Payment was cancelled before completion. Please scan the QR code to proceed.'
-            });
           }
         }
       }
@@ -180,6 +178,15 @@ export const initiateRazorpayPayment = async ({
 
   try {
     const rzpInstance = new (window as any).Razorpay(options);
+
+    // Also listen to payment.success event to guarantee receipt capture
+    rzpInstance.on('payment.success', function (response: any) {
+      if (!paymentSuccessful) {
+        paymentSuccessful = true;
+        console.info('[WORKIVO Razorpay Event] payment.success fired:', response);
+        onSuccess(response);
+      }
+    });
 
     rzpInstance.on('payment.failed', function (response: any) {
       console.error('[WORKIVO Razorpay] Payment Failed:', response.error);

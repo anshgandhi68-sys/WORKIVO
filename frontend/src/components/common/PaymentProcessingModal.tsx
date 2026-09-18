@@ -37,6 +37,9 @@ export const PaymentProcessingModal: React.FC<PaymentProcessingModalProps> = ({
   const [progress, setProgress] = useState(15);
   const [isDone, setIsDone] = useState(false);
 
+  const onCompleteRef = React.useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
   useEffect(() => {
     if (!isOpen) {
       setCurrentStage(0);
@@ -45,35 +48,37 @@ export const PaymentProcessingModal: React.FC<PaymentProcessingModalProps> = ({
       return;
     }
 
-    // Step 0 -> Step 1: Gateway Authorization (0 to 650ms)
+    // Step 0 -> Step 1: Gateway Authorization (0 to 350ms)
     const timer1 = setTimeout(() => {
       setCurrentStage(1);
       setProgress(40);
-    }, 700);
+    }, 350);
 
-    // Step 1 -> Step 2: Escrow Lock (700 to 1400ms)
+    // Step 1 -> Step 2: Escrow Lock (350 to 750ms)
     const timer2 = setTimeout(() => {
       setCurrentStage(2);
-      setProgress(68);
-    }, 1450);
+      setProgress(70);
+    }, 750);
 
-    // Step 2 -> Step 3: Worker Slot Reservation (1450 to 2200ms)
+    // Step 2 -> Step 3: Worker Slot Reservation (750 to 1150ms)
     const timer3 = setTimeout(() => {
       setCurrentStage(3);
       setProgress(90);
-    }, 2200);
+    }, 1150);
 
-    // Step 3 -> Step 4: Final Cryptographic Escrow Certificate (2200 to 2850ms)
+    // Step 3 -> Step 4: Final Cryptographic Escrow Certificate (1150 to 1550ms)
     const timer4 = setTimeout(() => {
       setCurrentStage(4);
       setProgress(100);
       setIsDone(true);
-    }, 2900);
+    }, 1550);
 
     // Transition to confirmation after showing final completion state
     const timer5 = setTimeout(() => {
-      onComplete();
-    }, 3400);
+      if (onCompleteRef.current) {
+        onCompleteRef.current();
+      }
+    }, 1900);
 
     return () => {
       clearTimeout(timer1);
@@ -82,7 +87,7 @@ export const PaymentProcessingModal: React.FC<PaymentProcessingModalProps> = ({
       clearTimeout(timer4);
       clearTimeout(timer5);
     };
-  }, [isOpen, onComplete]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -247,6 +252,16 @@ export const PaymentProcessingModal: React.FC<PaymentProcessingModalProps> = ({
             );
           })}
         </div>
+
+        {/* Instant Advance Button */}
+        {isDone && (
+          <button
+            onClick={() => onCompleteRef.current?.()}
+            className="w-full mb-3 py-3 bg-[#5415A0] hover:bg-[#430E7E] text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer animate-in fade-in"
+          >
+            <span>View Confirmed Booking & Receipt →</span>
+          </button>
+        )}
 
         {/* Security / Trust Footer */}
         <div className="pt-3 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] text-slate-400 font-medium">

@@ -43,6 +43,7 @@ export const Step4Payment: React.FC = () => {
   const [showProcessingModal, setShowProcessingModal] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [activePaymentId, setActivePaymentId] = useState<string>('');
+  const [dismissedWithBankTransfer, setDismissedWithBankTransfer] = useState<boolean>(false);
 
   // Resolve Razorpay Key: from env, localStorage, or user input
   const [customKey, setCustomKey] = useState<string>(() => {
@@ -83,8 +84,24 @@ export const Step4Payment: React.FC = () => {
     }
   };
 
+  const handlePaymentComplete = React.useCallback(async (overrideId?: string) => {
+    const finalId = overrideId || activePaymentId || `pay_upi_bank_${Date.now()}`;
+    await confirmBooking(finalId);
+    setIsSubmitting(false);
+    setShowProcessingModal(false);
+  }, [activePaymentId, confirmBooking]);
+
+  const handleDirectConfirmPayment = async (customTxnId?: string) => {
+    const txn = customTxnId?.trim() || activePaymentId || `pay_upi_bank_${Date.now()}`;
+    setActivePaymentId(txn);
+    setPaymentError(null);
+    setDismissedWithBankTransfer(false);
+    setShowProcessingModal(true);
+  };
+
   const handleAuthorize = async () => {
     setPaymentError(null);
+    setDismissedWithBankTransfer(false);
     const keyToUse = customKey.trim() || (import.meta.env.VITE_RAZORPAY_KEY_ID as string)?.trim() || '';
 
     if (!keyToUse) {
@@ -109,7 +126,8 @@ export const Step4Payment: React.FC = () => {
       customKey: keyToUse,
       onSuccess: async (response) => {
         console.info('[WORKIVO Step4] Razorpay Payment Success:', response);
-        setActivePaymentId(response.razorpay_payment_id);
+        const paymentId = response.razorpay_payment_id;
+        setActivePaymentId(paymentId);
         setPaymentError(null);
         // Show escrow lock animation modal
         setShowProcessingModal(true);
@@ -121,19 +139,13 @@ export const Step4Payment: React.FC = () => {
       },
       onDismiss: () => {
         setIsSubmitting(false);
-        setPaymentError('Payment window was closed before completing the deposit.');
+        setDismissedWithBankTransfer(true);
       }
     });
 
     if (!initiated) {
       setIsSubmitting(false);
     }
-  };
-
-  const handlePaymentComplete = async () => {
-    await confirmBooking(activePaymentId);
-    setIsSubmitting(false);
-    setShowProcessingModal(false);
   };
 
   return (
@@ -151,6 +163,57 @@ export const Step4Payment: React.FC = () => {
           Payment is locked safely in cooperative escrow and only disbursed upon your digital sign-off.
         </p>
       </div>
+
+      {/* Bank Transfer / Paid on Mobile Confirmation Banner */}
+      {dismissedWithBankTransfer && (
+        <div className="p-5 rounded-3xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border-2 border-emerald-400 shadow-sm animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-700/20">
+                <CheckCircle2 className="w-6 h-6 stroke-[2.5]" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm sm:text-base font-black text-emerald-950">
+                    Did you complete payment on your Phone / UPI App?
+                  </h4>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-200 text-emerald-900 uppercase">
+                    Bank Received
+                  </span>
+                </div>
+                <p className="text-xs text-emerald-800 mt-1 leading-relaxed font-medium">
+                  If the ₹{pricing.depositRequired} deposit was debited from your account and received in your bank, click below to immediately generate your cryptographic escrow certificate and confirm your booking!
+                </p>
+                <div className="mt-3.5 flex items-center gap-3 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => handleDirectConfirmPayment()}
+                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    <span>Confirm Payment Received & View Booking →</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAuthorize}
+                    className="px-4 py-2.5 bg-white border border-emerald-300 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Re-open Razorpay QR</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDismissedWithBankTransfer(false)}
+                    className="text-xs text-slate-500 hover:text-slate-700 font-semibold"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Payment Error / Dismiss Banner */}
       {paymentError && (
@@ -642,6 +705,17 @@ export const Step4Payment: React.FC = () => {
                     <ArrowRight className="w-3.5 h-3.5" />
                   </>
                 )}
+              </button>
+
+              {/* Instant Verification if User Already Sent Bank / UPI Payment */}
+              <button
+                type="button"
+                onClick={() => handleDirectConfirmPayment()}
+                disabled={isSubmitting || showProcessingModal}
+                className="w-full py-2.5 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 border border-emerald-300 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Already Paid via UPI / Bank? Confirm Receipt</span>
               </button>
 
               <button

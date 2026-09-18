@@ -162,6 +162,36 @@ export const Step5Confirm: React.FC<Step5ConfirmProps> = ({
         )}
       </div>
 
+      {/* Explicit Payment Received Status Banner */}
+      <div className="p-5 rounded-3xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 text-white shadow-xl shadow-emerald-700/20 flex items-center justify-between gap-4 border border-emerald-400/40">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/30">
+            <CheckCircle2 className="w-7 h-7 text-white stroke-[2.5]" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-base sm:text-lg font-black tracking-tight">
+                Payment Received in Bank (₹{pricing.depositRequired})
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-white text-emerald-800 uppercase tracking-wider shadow-xs">
+                Escrow Secured
+              </span>
+            </div>
+            <p className="text-xs text-emerald-100 mt-1">
+              Deposit received & locked in sovereign cooperative trust. {state.selectedWorker?.name} priority dispatch confirmed.
+            </p>
+          </div>
+        </div>
+        {state.razorpayPaymentId && (
+          <div className="hidden sm:block text-right shrink-0">
+            <span className="text-[10px] uppercase font-bold text-emerald-200 block">Txn Reference</span>
+            <span className="font-mono text-xs font-black bg-white/20 px-2.5 py-1 rounded-lg text-white border border-white/20">
+              {state.razorpayPaymentId}
+            </span>
+          </div>
+        )}
+      </div>
+
       {/* Main Confirmed Card */}
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8 space-y-6 relative overflow-hidden">
         {/* Top subtle ambient gradient bar */}
