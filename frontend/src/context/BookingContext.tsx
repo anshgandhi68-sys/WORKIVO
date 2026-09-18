@@ -62,7 +62,16 @@ interface BookingContextType {
 const BookingContext = createContext<BookingContextType | undefined>(undefined);
 
 export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4 | 5>(() => {
+    try {
+      const saved = sessionStorage.getItem('workivo_current_step');
+      if (saved) {
+        const num = parseInt(saved, 10);
+        if (num >= 1 && num <= 5) return num as any;
+      }
+    } catch {}
+    return 1;
+  });
   const [selectedTrade, setSelectedTradeState] = useState<TradeId>('cooking');
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(SERVICES[0]);
   const [selectedWorker, setSelectedWorker] = useState<Worker | null>(WORKERS[0]);
@@ -161,6 +170,9 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const goToStep = (step: 1 | 2 | 3 | 4 | 5) => {
     setCurrentStep(step);
+    try {
+      sessionStorage.setItem('workivo_current_step', step.toString());
+    } catch {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -242,6 +254,9 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const resetFlow = () => {
+    try {
+      sessionStorage.removeItem('workivo_current_step');
+    } catch {}
     setCurrentStep(1);
     setStatus('scheduled');
     setCancellationReason('');
