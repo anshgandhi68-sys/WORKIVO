@@ -183,6 +183,62 @@ function twilioApiPlugin() {
           return;
         }
 
+        // 5. Real-time Razorpay Payment Verification Poller
+        if (req.url?.startsWith('/api/check-razorpay-payment') && req.method === 'GET') {
+          let keyId = process.env.VITE_RAZORPAY_KEY_ID;
+          let keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+          if (!keyId || !keySecret) {
+            const possiblePaths = [
+              path.resolve(process.cwd(), 'frontend/.env'),
+              path.resolve(process.cwd(), '.env'),
+              path.resolve(__dirname, '.env'),
+              path.resolve(__dirname, 'frontend/.env')
+            ];
+            for (const p of possiblePaths) {
+              if (fs.existsSync(p)) {
+                const envContent = fs.readFileSync(p, 'utf8');
+                const matchKey = envContent.match(/^VITE_RAZORPAY_KEY_ID=(.*)$/m);
+                const matchSecret = envContent.match(/^RAZORPAY_KEY_SECRET=(.*)$/m);
+                if (matchKey && matchKey[1]) keyId = matchKey[1].trim();
+                if (matchSecret && matchSecret[1]) keySecret = matchSecret[1].trim();
+                if (keyId && keySecret) break;
+              }
+            }
+          }
+
+          if (!keyId || !keySecret) {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify({ configured: false, error: 'Razorpay keys not configured' }));
+          }
+
+          try {
+            const authHeader = 'Basic ' + Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+            const rzpRes = await fetch('https://api.razorpay.com/v1/payments?count=5', {
+              headers: { Authorization: authHeader }
+            });
+            const data = await rzpRes.json();
+            const payments = data.items || [];
+            const latest = payments[0] || null;
+
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify({
+              configured: true,
+              latestPayment: latest,
+              isSuccess: latest?.status === 'captured' || latest?.status === 'authorized',
+              isBlockedDomain: Boolean(latest?.error_description?.includes('website does not match')),
+              errorDescription: latest?.error_description || null,
+              items: payments
+            }));
+          } catch (err: any) {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify({ configured: true, error: err.message }));
+          }
+        }
+
         next();
       });
     }

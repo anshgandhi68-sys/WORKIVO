@@ -56,6 +56,48 @@ export const Step4Payment: React.FC = () => {
   const [showKeyConfig, setShowKeyConfig] = useState<boolean>(false);
   const [keySaveSuccess, setKeySaveSuccess] = useState<boolean>(false);
 
+  // Real-time Automatic Razorpay Payment Status Poller (Polls every 2.5s)
+  React.useEffect(() => {
+    let isCancelled = false;
+
+    const checkPaymentStatus = async () => {
+      try {
+        const res = await fetch('/api/check-razorpay-payment');
+        const data = await res.json();
+        if (isCancelled || !data.configured) return;
+
+        // If a payment was successfully captured or authorized on Razorpay's backend
+        if (data.isSuccess && data.latestPayment) {
+          const paymentId = data.latestPayment.id;
+          console.info('⚡ [Real-time Detection] Payment captured on Razorpay:', paymentId);
+          // Remove Razorpay modal iframe if active
+          const rzpContainer = document.querySelector('.razorpay-container') || document.querySelector('iframe[src*="razorpay"]');
+          rzpContainer?.remove();
+          setActivePaymentId(paymentId);
+          await confirmBooking(paymentId);
+          return;
+        }
+
+        // If Razorpay live domain blocked the localhost website
+        if (data.isBlockedDomain && !paymentError) {
+          setPaymentError(
+            'Razorpay Live Warning: "Payment blocked as website does not match registered website". If ₹1 was deducted from your bank, click "Already Paid via UPI / Bank? Confirm Receipt" below to immediately view your confirmed booking certificate!'
+          );
+        }
+      } catch (e) {
+        // silent
+      }
+    };
+
+    checkPaymentStatus();
+    const interval = setInterval(checkPaymentStatus, 2500);
+
+    return () => {
+      isCancelled = true;
+      clearInterval(interval);
+    };
+  }, [confirmBooking, paymentError]);
+
   const handleVerify = async () => {
     setIsVerifying(true);
     await verifyUpi();
