@@ -64,7 +64,7 @@ const MainAppContent: React.FC = () => {
   };
 
   const handleReplacementAccepted = (artisanName: string) => {
-    alert(`Handover authorized: ${artisanName} assigned to dispatch #WKV-849201. Your ₹225 escrow deposit remains locked with zero price change.`);
+    alert(`Handover authorized: ${artisanName} assigned to dispatch #WKV-849201. Your ₹1 escrow deposit remains locked with zero price change.`);
     goToStep(5);
     setActivePage('bookings');
   };

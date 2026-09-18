@@ -29,7 +29,7 @@ export async function syncBookingToDatabase(booking: BookingState) {
     scheduled_time: booking.selectedSlot?.timeRange,
     address_line: `${booking.address.street}, ${booking.address.locality}, ${booking.address.city}`,
     notes: booking.artisanNotes,
-    deposit_amount: 225,
+    deposit_amount: 1,
     total_amount: 900,
     payment_method: booking.paymentMethod,
     upi_id: booking.paymentMethod === 'upi' ? booking.upiId : null,

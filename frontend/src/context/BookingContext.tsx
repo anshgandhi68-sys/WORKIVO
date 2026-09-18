@@ -105,9 +105,9 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const discountAmount = isRecurring ? Math.round(baseEstimate * 0.10) : 0;
   const finalTotal = Math.max(99, baseEstimate - discountAmount);
 
-  // 25% escrow lock, 75% balance upon satisfaction
-  const depositRequired = Math.round(finalTotal * 0.25);
-  const balanceOnSignoff = finalTotal - depositRequired;
+  // 25% escrow lock (Reduced to ₹1 for gateway test mode and ₹1 QR Code generation)
+  const depositRequired = 1;
+  const balanceOnSignoff = Math.max(0, finalTotal - depositRequired);
   
   // 85% / 10% / 5% Co-op Transparent Wage Split
   const workerDividend = Math.round(finalTotal * 0.85);

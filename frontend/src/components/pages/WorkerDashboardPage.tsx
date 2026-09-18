@@ -276,7 +276,7 @@ export const WorkerDashboardPage: React.FC<WorkerDashboardPageProps> = ({
                       <div className="text-right">
                         <span className="text-[10px] text-slate-400 block font-semibold">Co-op Escrow</span>
                         <span className="text-base font-black text-slate-900">₹900</span>
-                        <span className="text-[10px] text-slate-500 block">(₹225 deposit held)</span>
+                        <span className="text-[10px] text-slate-500 block">(₹1 deposit held)</span>
                       </div>
                     </div>
 

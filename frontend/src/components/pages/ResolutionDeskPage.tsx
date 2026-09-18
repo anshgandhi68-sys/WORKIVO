@@ -50,7 +50,7 @@ export const ResolutionDeskPage: React.FC<ResolutionDeskPageProps> = ({
 
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-[#5415A0] text-xs font-bold border border-purple-200">
           <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Escrow Protected (₹225 Deposited)</span>
+          <span>Escrow Protected (₹1 Deposited)</span>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ export const ResolutionDeskPage: React.FC<ResolutionDeskPageProps> = ({
             <ShieldCheck className="w-4 h-4" />
           </div>
           <p className="text-xs text-slate-700 leading-relaxed font-medium">
-            Your scheduled slot (<strong className="text-slate-900">Today, 08:00 AM – 10:00 AM</strong>) and <strong className="text-slate-900">₹225 escrow deposit</strong> are 100% protected under the WORKIVO Peer Replacement Guarantee. Seamless handover with zero extra charge.
+            Your scheduled slot (<strong className="text-slate-900">Today, 08:00 AM – 10:00 AM</strong>) and <strong className="text-slate-900">₹1 escrow deposit</strong> are 100% protected under the WORKIVO Peer Replacement Guarantee. Seamless handover with zero extra charge.
           </p>
         </div>
 
@@ -394,15 +394,15 @@ export const ResolutionDeskPage: React.FC<ResolutionDeskPageProps> = ({
 
           <button
             onClick={() => {
-              if (confirm("Cancel this booking? Your ₹225 escrow deposit will be reversed instantly to your UPI account.")) {
-                alert("Escrow deposit reversed (₹225.00 refunded via UPI: ravi.coop@oksbi).");
+              if (confirm("Cancel this booking? Your ₹1 escrow deposit will be reversed instantly to your UPI account.")) {
+                alert("Escrow deposit reversed (₹1.00 refunded via UPI: ravi.coop@oksbi).");
                 onBackToBookings();
               }
             }}
             className="px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-xs font-bold text-rose-700 transition-colors flex items-center gap-1.5"
           >
             <XCircle className="w-3.5 h-3.5" />
-            <span>Cancel with Instant Full Refund (₹225)</span>
+            <span>Cancel with Instant Full Refund (₹1)</span>
           </button>
         </div>
       </div>
