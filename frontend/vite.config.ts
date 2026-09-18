@@ -145,6 +145,44 @@ function twilioApiPlugin() {
           return;
         }
 
+        // 4. Save Razorpay Keys to .env dynamically
+        if (req.url === '/api/save-razorpay-key' && req.method === 'POST') {
+          let body = '';
+          req.on('data', (c: any) => { body += c; });
+          req.on('end', () => {
+            try {
+              const { keyId, keySecret } = JSON.parse(body || '{}');
+              if (keyId) process.env.VITE_RAZORPAY_KEY_ID = keyId;
+              if (keySecret) process.env.RAZORPAY_KEY_SECRET = keySecret;
+
+              const envPath = path.resolve(process.cwd(), '.env');
+              let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
+
+              const updateKey = (key: string, val: string) => {
+                const regex = new RegExp(`^${key}=.*$`, 'm');
+                if (regex.test(envContent)) {
+                  envContent = envContent.replace(regex, `${key}=${val}`);
+                } else {
+                  envContent += `\n${key}=${val}`;
+                }
+              };
+
+              if (keyId) updateKey('VITE_RAZORPAY_KEY_ID', keyId);
+              if (keySecret) updateKey('RAZORPAY_KEY_SECRET', keySecret);
+
+              fs.writeFileSync(envPath, envContent.trim() + '\n', 'utf8');
+
+              res.statusCode = 200;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ success: true, message: 'Razorpay Key ID saved successfully!' }));
+            } catch (err: any) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ success: false, error: err.message }));
+            }
+          });
+          return;
+        }
+
         next();
       });
     }

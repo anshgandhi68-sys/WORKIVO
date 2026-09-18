@@ -13,9 +13,17 @@ import {
   Wrench, 
   CheckCircle2, 
   RefreshCw, 
-  Zap
+  Zap,
+  QrCode,
+  Key,
+  AlertCircle,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useBooking } from '../../context/BookingContext';
+import { useAuth } from '../../context/AuthContext';
+import { initiateRazorpayPayment } from '../../lib/razorpay';
 import { PaymentProcessingModal } from '../common/PaymentProcessingModal';
 
 export const Step4Payment: React.FC = () => {
@@ -28,10 +36,24 @@ export const Step4Payment: React.FC = () => {
     confirmBooking, 
     prevStep 
   } = useBooking();
+  const { currentUser } = useAuth();
 
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showProcessingModal, setShowProcessingModal] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [activePaymentId, setActivePaymentId] = useState<string>('');
+
+  // Resolve Razorpay Key: from env, localStorage, or user input
+  const [customKey, setCustomKey] = useState<string>(() => {
+    return (
+      (import.meta.env.VITE_RAZORPAY_KEY_ID as string)?.trim() ||
+      localStorage.getItem('workivo_razorpay_key')?.trim() ||
+      ''
+    );
+  });
+  const [showKeyConfig, setShowKeyConfig] = useState<boolean>(false);
+  const [keySaveSuccess, setKeySaveSuccess] = useState<boolean>(false);
 
   const handleVerify = async () => {
     setIsVerifying(true);
@@ -39,13 +61,77 @@ export const Step4Payment: React.FC = () => {
     setIsVerifying(false);
   };
 
-  const handleAuthorize = () => {
+  const handleSaveKey = async (newKey: string) => {
+    const trimmed = newKey.trim();
+    setCustomKey(trimmed);
+    if (trimmed) {
+      localStorage.setItem('workivo_razorpay_key', trimmed);
+      try {
+        await fetch('/api/save-razorpay-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ keyId: trimmed })
+        });
+      } catch (e) {
+        // ignore if static / production
+      }
+      setKeySaveSuccess(true);
+      setTimeout(() => setKeySaveSuccess(false), 3000);
+      setPaymentError(null);
+    } else {
+      localStorage.removeItem('workivo_razorpay_key');
+    }
+  };
+
+  const handleAuthorize = async () => {
+    setPaymentError(null);
+    const keyToUse = customKey.trim() || (import.meta.env.VITE_RAZORPAY_KEY_ID as string)?.trim() || '';
+
+    if (!keyToUse) {
+      setShowKeyConfig(true);
+      setPaymentError(
+        'Razorpay API Key ID is required. Please paste your Key ID (rzp_test_... or rzp_live_...) below to start checkout.'
+      );
+      return;
+    }
+
     setIsSubmitting(true);
-    setShowProcessingModal(true);
+
+    const initiated = await initiateRazorpayPayment({
+      amount: pricing.depositRequired, // e.g. ₹1
+      bookingId: state.bookingId,
+      serviceTitle: state.selectedService?.title || 'Cooperative Service',
+      workerName: state.selectedWorker?.name || 'Assigned Specialist',
+      customerName: currentUser?.name || 'WORKIVO Customer',
+      customerEmail: currentUser?.email || 'member@workivo.coop',
+      customerPhone: currentUser?.phone || '9426262139',
+      upiId: state.upiId || 'success@razorpay',
+      customKey: keyToUse,
+      onSuccess: async (response) => {
+        console.info('[WORKIVO Step4] Razorpay Payment Success:', response);
+        setActivePaymentId(response.razorpay_payment_id);
+        setPaymentError(null);
+        // Show escrow lock animation modal
+        setShowProcessingModal(true);
+      },
+      onError: (error) => {
+        console.warn('[WORKIVO Step4] Razorpay Payment Error:', error);
+        setIsSubmitting(false);
+        setPaymentError(error.description || 'Payment authorization failed. Please try again.');
+      },
+      onDismiss: () => {
+        setIsSubmitting(false);
+        setPaymentError('Payment window was closed before completing the deposit.');
+      }
+    });
+
+    if (!initiated) {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePaymentComplete = async () => {
-    await confirmBooking();
+    await confirmBooking(activePaymentId);
     setIsSubmitting(false);
     setShowProcessingModal(false);
   };
@@ -62,9 +148,54 @@ export const Step4Payment: React.FC = () => {
           Transparent Escrow Deposit
         </h1>
         <p className="mt-1.5 text-sm text-slate-500 font-medium">
-          Payment is locked in cooperative escrow and only disbursed upon your digital sign-off.
+          Payment is locked safely in cooperative escrow and only disbursed upon your digital sign-off.
         </p>
       </div>
+
+      {/* Payment Error / Dismiss Banner */}
+      {paymentError && (
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 shadow-xs animate-in fade-in duration-200">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-extrabold text-rose-900 uppercase tracking-wide">
+                  Payment Notice
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setPaymentError(null)}
+                  className="text-xs text-rose-500 hover:text-rose-800 font-semibold"
+                >
+                  Dismiss
+                </button>
+              </div>
+              <p className="text-xs text-rose-700 mt-1 leading-relaxed font-medium">
+                {paymentError}
+              </p>
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleAuthorize}
+                  className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Retry Payment (₹{pricing.depositRequired})</span>
+                </button>
+                {!customKey && (
+                  <button
+                    type="button"
+                    onClick={() => setShowKeyConfig(true)}
+                    className="px-3 py-1.5 bg-white border border-rose-300 text-rose-700 text-xs font-bold rounded-xl hover:bg-rose-50"
+                  >
+                    Enter Key ID
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Two-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -181,10 +312,88 @@ export const Step4Payment: React.FC = () => {
             </div>
           </div>
 
-          {/* 2. Select Payment Method Card */}
+          {/* 2. Razorpay Gateway Status & Key Management Card */}
+          <div className="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-2xl bg-[#5415A0] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                  <QrCode className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                      Razorpay Payment Gateway
+                    </h3>
+                    {customKey ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Active
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                        Key Pending
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {customKey ? (
+                      <span>Active Key: <code className="text-[#5415A0] font-bold font-mono text-[11px] bg-purple-50 px-1.5 py-0.5 rounded">{customKey}</code></span>
+                    ) : (
+                      <span>Enter your Key ID below or set <code className="text-purple-900 font-bold font-mono">VITE_RAZORPAY_KEY_ID</code></span>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowKeyConfig(!showKeyConfig)}
+                className="px-3 py-1.5 text-[11px] font-bold text-[#5415A0] hover:bg-purple-50 rounded-xl transition-colors flex items-center gap-1 border border-purple-200 shrink-0 cursor-pointer"
+              >
+                <Key className="w-3 h-3 text-[#5415A0]" />
+                <span>{showKeyConfig ? 'Close' : (customKey ? 'Change Key' : 'Configure')}</span>
+              </button>
+            </div>
+
+            {/* Expandable Key Configuration Box */}
+            {(showKeyConfig || !customKey) && (
+              <div className="pt-3 border-t border-slate-100 space-y-2 animate-in fade-in duration-150">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                  <span>Razorpay Key ID (rzp_test_... or rzp_live_...):</span>
+                  {keySaveSuccess && (
+                    <span className="text-emerald-600 font-bold flex items-center gap-1 text-[11px]">
+                      <Check className="w-3.5 h-3.5 stroke-[3]" /> Saved & Connected!
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={customKey}
+                    onChange={(e) => setCustomKey(e.target.value.trim())}
+                    placeholder="rzp_test_TO0Zvk3JDd91cP"
+                    className="flex-1 px-3.5 py-2 text-xs font-mono rounded-xl border border-purple-200 bg-[#FAF8FE] focus:outline-none focus:border-[#5415A0] focus:bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleSaveKey(customKey)}
+                    className="px-4 py-2 bg-[#5415A0] hover:bg-[#430E7E] text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer"
+                  >
+                    Save Key
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 leading-tight">
+                  Supports instant UPI QR code, PhonePe, GPay, Paytm, Cards & NetBanking via official Razorpay modal.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* 3. Select Payment Method Card */}
           <div className="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm">
             <h3 className="text-base font-extrabold text-slate-900 mb-4">
-              Select Payment Method
+              Select Payment Channel
             </h3>
 
             <div className="space-y-3">
@@ -205,17 +414,22 @@ export const Step4Payment: React.FC = () => {
                         : 'border-2 border-slate-300'
                     }`} />
                     <div>
-                      <span className="text-xs font-bold text-slate-900 block">
-                        UPI (Instant & Zero Surcharge)
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-900">
+                          UPI & Dynamic QR Code
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-purple-100 text-[#5415A0] border border-purple-200">
+                          Razorpay UPI
+                        </span>
+                      </div>
                       <span className="text-[11px] text-slate-500">
-                        Google Pay, PhonePe, Paytm, BHIM & Any UPI ID
+                        Scan QR or pay via Google Pay, PhonePe, Paytm, BHIM, CRED
                       </span>
                     </div>
                   </div>
 
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-100 text-[#5415A0]">
-                    Fastest
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
+                    Instant
                   </span>
                 </div>
 
@@ -226,7 +440,7 @@ export const Step4Payment: React.FC = () => {
                         type="text"
                         value={state.upiId}
                         onChange={(e) => setUpiId(e.target.value)}
-                        placeholder="username@bank or 9876543210@upi"
+                        placeholder="yourname@okhdfcbank or 9426262139@upi"
                         className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-[#5415A0] bg-white"
                       />
                       <button
@@ -236,7 +450,7 @@ export const Step4Payment: React.FC = () => {
                           handleVerify();
                         }}
                         disabled={isVerifying}
-                        className="px-4 py-2 bg-[#3B0764] hover:bg-[#5415A0] text-white text-xs font-bold rounded-xl transition-colors shrink-0 flex items-center gap-1"
+                        className="px-4 py-2 bg-[#3B0764] hover:bg-[#5415A0] text-white text-xs font-bold rounded-xl transition-colors shrink-0 flex items-center gap-1 cursor-pointer"
                       >
                         {state.isUpiVerified ? (
                           <>
@@ -249,7 +463,7 @@ export const Step4Payment: React.FC = () => {
                       </button>
                     </div>
                     <p className="text-[10px] text-slate-400">
-                      Zero convenience fee or surge markup on cooperative escrow deposits.
+                      When you click Pay, a live Razorpay UPI QR code is also displayed for instant camera scanning.
                     </p>
                   </div>
                 )}
@@ -271,11 +485,16 @@ export const Step4Payment: React.FC = () => {
                       : 'border-2 border-slate-300'
                   }`} />
                   <div>
-                    <span className="text-xs font-bold text-slate-900 block">
-                      Credit/Debit Cards
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-900">
+                        Credit / Debit Cards
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-slate-100 text-slate-700">
+                        3D Secure
+                      </span>
+                    </div>
                     <span className="text-[11px] text-slate-500">
-                      Visa, Mastercard, RuPay, Maestro
+                      Visa, Mastercard, RuPay, Maestro & Corporate cards
                     </span>
                   </div>
                 </div>
@@ -301,11 +520,16 @@ export const Step4Payment: React.FC = () => {
                       : 'border-2 border-slate-300'
                   }`} />
                   <div>
-                    <span className="text-xs font-bold text-slate-900 block">
-                      Net Banking
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-900">
+                        Net Banking
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-slate-100 text-slate-700">
+                        50+ Banks
+                      </span>
+                    </div>
                     <span className="text-[11px] text-slate-500">
-                      All Major Indian Banks (SBI, HDFC, ICICI, Axis)
+                      HDFC, ICICI, SBI, Axis, Kotak and all scheduled banks
                     </span>
                   </div>
                 </div>
@@ -400,16 +624,21 @@ export const Step4Payment: React.FC = () => {
               <button
                 onClick={handleAuthorize}
                 disabled={isSubmitting || showProcessingModal}
-                className="w-full py-3.5 bg-[#5415A0] hover:bg-[#430E7E] text-white rounded-xl font-bold text-xs transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-80 active:scale-[0.99]"
+                className="w-full py-3.5 bg-[#5415A0] hover:bg-[#430E7E] text-white rounded-xl font-bold text-xs sm:text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-80 active:scale-[0.99] cursor-pointer"
               >
                 {isSubmitting || showProcessingModal ? (
                   <span className="flex items-center gap-2">
                     <RefreshCw className="w-4 h-4 animate-spin text-purple-200" />
-                    <span>Processing Escrow Protocol...</span>
+                    <span>Connecting Razorpay Gateway...</span>
                   </span>
                 ) : (
                   <>
-                    <span>Authorize Escrow Deposit (₹{pricing.depositRequired})</span>
+                    <QrCode className="w-4 h-4 stroke-[2.5]" />
+                    <span>
+                      {state.paymentMethod === 'upi'
+                        ? `Pay ₹${pricing.depositRequired} with Razorpay UPI / QR`
+                        : `Pay ₹${pricing.depositRequired} with Razorpay`}
+                    </span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </>
                 )}
@@ -418,7 +647,7 @@ export const Step4Payment: React.FC = () => {
               <button
                 onClick={prevStep}
                 disabled={isSubmitting || showProcessingModal}
-                className="w-full py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+                className="w-full py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Change Schedule</span>
@@ -444,6 +673,7 @@ export const Step4Payment: React.FC = () => {
         serviceTitle={state.selectedService?.title || 'Cooperative Service'}
         paymentMethod={state.paymentMethod}
         upiId={state.upiId}
+        razorpayPaymentId={activePaymentId}
         onComplete={handlePaymentComplete}
       />
     </div>
