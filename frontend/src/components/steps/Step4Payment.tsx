@@ -67,6 +67,7 @@ export const Step4Payment: React.FC = () => {
       customerName: currentUser?.name || 'WORKIVO Customer',
       customerEmail: currentUser?.email || 'member@workivo.coop',
       customerPhone: currentUser?.phone || '9426262139',
+      upiId: state.upiId || 'success@razorpay',
       customKey: customKey,
       onSuccess: async (response) => {
         console.log('[WORKIVO Step4] Razorpay Payment Success:', response);
@@ -351,48 +352,84 @@ export const Step4Payment: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Manual VPA Toggle */}
-                    <div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowManualUpi(!showManualUpi);
-                        }}
-                        className="text-[11px] font-semibold text-purple-800 hover:text-[#5415A0] flex items-center gap-1 underline"
-                      >
-                        {showManualUpi ? 'Hide manual UPI ID' : 'Or enter manual UPI ID / VPA'}
-                      </button>
+                    {/* Active UPI ID & Gateway Selector */}
+                    <div className="p-3.5 bg-purple-50/70 rounded-2xl border border-purple-200/90 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>Active UPI ID for Escrow:</span>
+                        </span>
+                        <span className="text-[11px] font-mono font-bold text-[#5415A0] bg-white px-2.5 py-0.5 rounded-md border border-purple-200 shadow-2xs">
+                          {state.upiId}
+                        </span>
+                      </div>
 
-                      {showManualUpi && (
-                        <div className="mt-2 flex gap-2 animate-fadeIn">
-                          <input
-                            type="text"
-                            value={state.upiId}
-                            onChange={(e) => setUpiId(e.target.value)}
-                            placeholder="username@bank"
-                            className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-[#5415A0] bg-white"
-                          />
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleVerify();
-                            }}
-                            disabled={isVerifying}
-                            className="px-4 py-2 bg-[#3B0764] hover:bg-[#5415A0] text-white text-xs font-bold rounded-xl transition-colors shrink-0 flex items-center gap-1"
-                          >
-                            {state.isUpiVerified ? (
-                              <>
-                                <Check className="w-3 h-3 stroke-[3]" />
-                                <span>Verified</span>
-                              </>
-                            ) : (
-                              <span>Verify ID</span>
-                            )}
-                          </button>
-                        </div>
-                      )}
+                      {/* Quick Select Presets */}
+                      <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                        <span className="text-[10px] text-slate-500 font-semibold">1-Click Presets:</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setUpiId('success@razorpay');
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors flex items-center gap-1 ${
+                            state.upiId === 'success@razorpay'
+                              ? 'bg-[#5415A0] text-white border-[#5415A0] shadow-xs'
+                              : 'bg-white text-purple-900 border-purple-200 hover:bg-purple-100'
+                          }`}
+                        >
+                          <Zap className="w-3 h-3 fill-current" />
+                          <span>success@razorpay (Test Gateway Verified)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setUpiId('9426262139@upi');
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors ${
+                            state.upiId === '9426262139@upi'
+                              ? 'bg-[#5415A0] text-white border-[#5415A0] shadow-xs'
+                              : 'bg-white text-purple-900 border-purple-200 hover:bg-purple-100'
+                          }`}
+                        >
+                          <span>9426262139@upi</span>
+                        </button>
+                      </div>
+
+                      {/* Direct UPI Input Field */}
+                      <div className="mt-1 flex gap-2">
+                        <input
+                          type="text"
+                          value={state.upiId}
+                          onChange={(e) => setUpiId(e.target.value)}
+                          placeholder="success@razorpay or username@bank"
+                          className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-purple-200 focus:outline-none focus:border-[#5415A0] bg-white font-mono"
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleVerify();
+                          }}
+                          disabled={isVerifying}
+                          className="px-4 py-2 bg-[#3B0764] hover:bg-[#5415A0] text-white text-xs font-bold rounded-xl transition-colors shrink-0 flex items-center gap-1"
+                        >
+                          {state.isUpiVerified ? (
+                            <>
+                              <Check className="w-3 h-3 stroke-[3]" />
+                              <span>Verified</span>
+                            </>
+                          ) : (
+                            <span>Verify</span>
+                          )}
+                        </button>
+                      </div>
+
+                      <p className="text-[10px] text-slate-500 leading-tight">
+                        * Razorpay Sandbox API (<code className="text-purple-800 font-bold">{customKey}</code>) automatically routes <strong className="text-purple-900">success@razorpay</strong> to instant verified status.
+                      </p>
                     </div>
                   </div>
                 )}

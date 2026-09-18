@@ -26,6 +26,7 @@ export interface InitiateRazorpayParams {
   customerName?: string;
   customerPhone?: string;
   customerEmail?: string;
+  upiId?: string;
   customKey?: string;
   onSuccess: (response: RazorpayPaymentSuccessResponse) => void;
   onError: (error: RazorpayPaymentErrorResponse) => void;
@@ -73,6 +74,7 @@ export const initiateRazorpayPayment = async ({
   customerName = 'WORKIVO Customer',
   customerPhone = '9876543210',
   customerEmail = 'member@workivo.coop',
+  upiId = 'success@razorpay',
   customKey,
   onSuccess,
   onError,
@@ -105,7 +107,9 @@ export const initiateRazorpayPayment = async ({
     prefill: {
       name: customerName,
       email: customerEmail,
-      contact: customerPhone
+      contact: customerPhone,
+      method: 'upi',
+      vpa: upiId || 'success@razorpay'
     },
     notes: {
       booking_id: bookingId,
