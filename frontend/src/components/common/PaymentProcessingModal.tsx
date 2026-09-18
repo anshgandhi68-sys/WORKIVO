@@ -19,6 +19,7 @@ interface PaymentProcessingModalProps {
   serviceTitle: string;
   paymentMethod: string;
   upiId?: string;
+  razorpayPaymentId?: string;
   onComplete: () => void;
 }
 
@@ -29,6 +30,7 @@ export const PaymentProcessingModal: React.FC<PaymentProcessingModalProps> = ({
   serviceTitle,
   paymentMethod,
   upiId,
+  razorpayPaymentId,
   onComplete
 }) => {
   const [currentStage, setCurrentStage] = useState(0);
@@ -87,9 +89,11 @@ export const PaymentProcessingModal: React.FC<PaymentProcessingModalProps> = ({
   const STAGES = [
     {
       title: 'Payment Authorization',
-      desc: paymentMethod === 'upi' 
-        ? `Verified via UPI (${upiId || 'Secure VPA'})` 
-        : 'Authorized via 256-bit Banking Gateway',
+      desc: razorpayPaymentId 
+        ? `Razorpay Verified (${razorpayPaymentId})`
+        : (paymentMethod === 'upi' 
+          ? `Verified via UPI (${upiId || 'Secure VPA'})` 
+          : 'Authorized via 256-bit Banking Gateway'),
       icon: paymentMethod === 'upi' ? Smartphone : CreditCard
     },
     {

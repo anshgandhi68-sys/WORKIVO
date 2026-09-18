@@ -41,7 +41,7 @@ interface BookingContextType {
   goToStep: (step: 1 | 2 | 3 | 4 | 5) => void;
   nextStep: () => void;
   prevStep: () => void;
-  confirmBooking: () => Promise<void>;
+  confirmBooking: (razorpayPaymentId?: string) => Promise<void>;
   cancelBooking: (reason?: string) => Promise<void>;
   resetFlow: () => void;
   pricing: {
@@ -77,6 +77,8 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [upiId, setUpiId] = useState<string>('customer.coop@oksbi');
   const [isUpiVerified, setIsUpiVerified] = useState<boolean>(true);
   const [bookingId, setBookingId] = useState<string>('#WKV-849201');
+  const [razorpayPaymentId, setRazorpayPaymentId] = useState<string>('');
+  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'success' | 'failed'>('pending');
   const [status, setStatus] = useState<'scheduled' | 'cancelled' | 'in_progress' | 'completed'>('scheduled');
   const [cancellationReason, setCancellationReason] = useState<string>('');
   const [refundAmount, setRefundAmount] = useState<number>(0);
@@ -174,8 +176,14 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const confirmBooking = async () => {
+  const confirmBooking = async (paymentId?: string) => {
     setStatus('scheduled');
+    const finalPaymentId = paymentId || razorpayPaymentId;
+    if (finalPaymentId) {
+      setRazorpayPaymentId(finalPaymentId);
+    }
+    setPaymentStatus('success');
+
     const currentState: BookingState = {
       currentStep: 5,
       selectedTrade,
@@ -191,6 +199,8 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
       upiId,
       isUpiVerified,
       bookingId,
+      razorpayPaymentId: finalPaymentId || undefined,
+      paymentStatus: 'success',
       status: 'scheduled',
       createdAt: new Date().toISOString()
     };
@@ -237,6 +247,8 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setCancellationReason('');
     setRefundAmount(0);
     setRefundTxHash('');
+    setRazorpayPaymentId('');
+    setPaymentStatus('pending');
     setSelectedService(SERVICES[0]);
     setSelectedWorker(WORKERS[0]);
     setSelectedDate(CALENDAR_DAYS[5]);
@@ -261,6 +273,8 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     upiId,
     isUpiVerified,
     bookingId,
+    razorpayPaymentId,
+    paymentStatus,
     status,
     cancellationReason,
     refundAmount,

@@ -265,6 +265,18 @@ export const Step5Confirm: React.FC<Step5ConfirmProps> = ({
             <p className="text-xs text-slate-600 leading-relaxed">
               <span className="font-bold text-slate-900">₹{pricing.depositRequired} Locked</span> in sovereign cooperative escrow. Balance of <span className="font-bold text-slate-900">₹{pricing.balanceOnSignoff}</span> is payable only upon your final satisfactory sign-off.
             </p>
+            {state.razorpayPaymentId && (
+              <div className="mt-2.5 flex items-center justify-between gap-2 p-2 bg-purple-100/60 rounded-xl border border-purple-200/80 text-[11px]">
+                <div className="flex items-center gap-1.5 text-purple-950 font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>Razorpay Txn:</span>
+                  <span className="font-mono font-bold text-[#5415A0]">{state.razorpayPaymentId}</span>
+                </div>
+                <span className="text-[10px] font-bold text-emerald-700 uppercase bg-emerald-100/90 px-2 py-0.5 rounded-md">
+                  Authorized & Captured
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

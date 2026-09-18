@@ -33,6 +33,8 @@ export async function syncBookingToDatabase(booking: BookingState) {
     total_amount: 900,
     payment_method: booking.paymentMethod,
     upi_id: booking.paymentMethod === 'upi' ? booking.upiId : null,
+    razorpay_payment_id: booking.razorpayPaymentId || null,
+    payment_status: booking.paymentStatus || 'success',
     status: 'escrow_locked',
     created_at: new Date().toISOString()
   };

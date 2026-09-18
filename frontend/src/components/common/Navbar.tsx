@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { HelpCircle, Bell, Plus, ShieldCheck, ChevronDown, Radio, Menu, X, Sparkles } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { HelpCircle, Bell, Plus, ShieldCheck, ChevronDown, Radio, Menu, X, Sparkles, LogIn, LogOut, User as UserIcon } from 'lucide-react';
 import { useBooking } from '../../context/BookingContext';
+import { useAuth } from '../../context/AuthContext';
 
 export type PortalMode = 'client' | 'worker';
 
@@ -31,17 +32,32 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ 
   activePage, 
-  portalMode,
-  onSelectPortalMode,
+  portalMode, 
+  onSelectPortalMode, 
   onNavigate, 
   onOpenHelp, 
   onOpenDashboard 
 }) => {
+  const { currentUser, openAuthModal, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleNav = (page: AppPage) => {
     onNavigate(page);
     setIsMobileMenuOpen(false);
+    setIsProfileDropdownOpen(false);
   };
 
   return (
@@ -221,19 +237,82 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#5415A0] rounded-full ring-2 ring-white"></span>
           </button>
 
-          {/* User Profile Pill */}
-          <div 
-            onClick={() => handleNav(portalMode === 'client' ? 'artisan-profile' : 'worker-dashboard')}
-            className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full border border-slate-200 bg-white hover:border-purple-300 cursor-pointer transition-colors"
-          >
-            <div className="w-7 h-7 rounded-full bg-purple-100 text-[#5415A0] font-black text-xs flex items-center justify-center">
-              RK
+          {/* User Profile / Sign In Area */}
+          {currentUser ? (
+            <div className="relative" ref={dropdownRef}>
+              <div 
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full border border-slate-200 bg-white hover:border-purple-300 cursor-pointer transition-all shadow-xs hover:shadow-sm select-none"
+                title="Account Menu"
+              >
+                <div className="w-7 h-7 rounded-full bg-[#5415A0] text-white font-black text-xs flex items-center justify-center shadow-xs">
+                  {currentUser.avatarInitials || 'WK'}
+                </div>
+                <div className="hidden md:block text-left pr-0.5">
+                  <span className="block text-[11px] font-extrabold text-slate-900 leading-tight truncate max-w-[85px]">
+                    {currentUser.name}
+                  </span>
+                  <span className="block text-[9px] text-emerald-600 font-bold leading-tight flex items-center gap-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                    <span>{currentUser.role === 'worker' ? 'Artisan' : 'Client'}</span>
+                  </span>
+                </div>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+              </div>
+
+              {/* Profile Dropdown Menu */}
+              {isProfileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl py-2 z-50 animate-fadeIn">
+                  <div className="px-3.5 py-2 border-b border-slate-100">
+                    <span className="text-xs font-bold text-slate-900 block truncate">{currentUser.name}</span>
+                    <span className="text-[11px] text-slate-400 block truncate">{currentUser.email}</span>
+                    <span className="mt-1.5 inline-block text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-purple-100 text-[#5415A0]">
+                      LocalStorage Session Active
+                    </span>
+                  </div>
+
+                  <div className="py-1">
+                    <button
+                      onClick={() => handleNav(currentUser.role === 'worker' ? 'worker-dashboard' : 'bookings')}
+                      className="w-full text-left px-3.5 py-2 text-xs text-slate-700 hover:bg-slate-50 font-medium flex items-center justify-between"
+                    >
+                      <span>{currentUser.role === 'worker' ? 'Worker Dashboard' : 'My Bookings'}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsProfileDropdownOpen(false);
+                        openAuthModal('login');
+                      }}
+                      className="w-full text-left px-3.5 py-2 text-xs text-slate-700 hover:bg-slate-50 font-medium flex items-center justify-between"
+                    >
+                      <span>Switch / Manage Accounts</span>
+                    </button>
+                  </div>
+
+                  <div className="pt-1 border-t border-slate-100">
+                    <button
+                      onClick={() => {
+                        setIsProfileDropdownOpen(false);
+                        logout();
+                      }}
+                      className="w-full text-left px-3.5 py-2 text-xs text-rose-600 hover:bg-rose-50 font-bold flex items-center gap-2"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="hidden md:block text-left pr-1">
-              <span className="block text-[11px] font-extrabold text-slate-900 leading-tight">Ravi Kumar</span>
-              <span className="block text-[9px] text-slate-400 leading-tight">Hub #408</span>
-            </div>
-          </div>
+          ) : (
+            <button
+              onClick={() => openAuthModal('login')}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-purple-200 bg-purple-50/70 hover:bg-purple-100 text-[#5415A0] text-xs font-bold transition-all shadow-xs active:scale-95"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
+          )}
 
           {/* Mobile Hamburger Toggle */}
           <button
@@ -297,8 +376,48 @@ export const Navbar: React.FC<NavbarProps> = ({
               {item.label}
             </button>
           ))}
+
+          {/* Mobile Auth Actions */}
+          <div className="pt-2 border-t border-slate-100">
+            {currentUser ? (
+              <div className="p-3 bg-purple-50/70 rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[#5415A0] text-white font-bold text-xs flex items-center justify-center">
+                    {currentUser.avatarInitials || 'WK'}
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 block truncate">{currentUser.name}</span>
+                    <span className="text-[10px] text-slate-500 block truncate">{currentUser.email}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="px-2.5 py-1 text-xs font-bold text-rose-600 bg-white border border-rose-200 rounded-lg hover:bg-rose-50"
+                >
+                  Log Out
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  openAuthModal('login');
+                }}
+                className="w-full py-2.5 bg-[#5415A0] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In / Create Account</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
+
     </header>
   );
 };

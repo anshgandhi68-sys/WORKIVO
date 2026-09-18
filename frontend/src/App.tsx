@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AuthProvider } from './context/AuthContext';
 import { BookingProvider, useBooking } from './context/BookingContext';
 import { Navbar, AppPage } from './components/common/Navbar';
 import { Stepper } from './components/common/Stepper';
@@ -9,6 +10,7 @@ import { ReceiptModal } from './components/common/ReceiptModal';
 import { DashboardModal } from './components/common/DashboardModal';
 import { MutualAidModal } from './components/common/MutualAidModal';
 import { NominateApprenticeModal } from './components/common/NominateApprenticeModal';
+import { AuthModal } from './components/common/AuthModal';
 
 import { HomePage } from './components/pages/HomePage';
 import { ServicesPage } from './components/pages/ServicesPage';
@@ -224,15 +226,18 @@ const MainAppContent: React.FC = () => {
         isOpen={isNominateOpen}
         onClose={() => setIsNominateOpen(false)}
       />
+      <AuthModal />
     </div>
   );
 };
 
 export function App() {
   return (
-    <BookingProvider>
-      <MainAppContent />
-    </BookingProvider>
+    <AuthProvider>
+      <BookingProvider>
+        <MainAppContent />
+      </BookingProvider>
+    </AuthProvider>
   );
 }
 

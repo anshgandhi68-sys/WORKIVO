@@ -83,8 +83,16 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose }) =
             </div>
             <div className="flex justify-between py-2 border-b border-slate-100">
               <span className="text-slate-500">Payment Channel:</span>
-              <span className="font-semibold text-slate-800 uppercase">{state.paymentMethod} {state.paymentMethod === 'upi' ? `(${state.upiId})` : ''}</span>
+              <span className="font-semibold text-slate-800 uppercase">
+                {state.razorpayPaymentId ? 'Razorpay UPI QR' : state.paymentMethod} {state.paymentMethod === 'upi' && state.upiId && !state.razorpayPaymentId ? `(${state.upiId})` : ''}
+              </span>
             </div>
+            {state.razorpayPaymentId && (
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Razorpay Ref ID:</span>
+                <span className="font-mono font-bold text-[#5415A0] text-xs">{state.razorpayPaymentId}</span>
+              </div>
+            )}
           </div>
 
           {/* Wage Split Breakdown */}

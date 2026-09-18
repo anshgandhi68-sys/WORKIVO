@@ -100,6 +100,8 @@ export interface BookingState {
   upiId: string;
   isUpiVerified: boolean;
   bookingId: string;
+  razorpayPaymentId?: string;
+  paymentStatus?: 'pending' | 'success' | 'failed';
   status: 'scheduled' | 'cancelled' | 'in_progress' | 'completed';
   cancellationReason?: string;
   refundAmount?: number;
