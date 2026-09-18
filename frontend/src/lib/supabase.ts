@@ -1,13 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 import type { BookingState } from '../types';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const rawUrl = (import.meta.env.VITE_SUPABASE_URL as string)?.trim() || '';
+// Clean the URL: strip accidental /rest/v1 suffix and trailing slashes so createClient works properly
+const supabaseUrl = rawUrl
+  .replace(/\/rest\/v1\/?$/i, '')
+  .replace(/\/+$/, '');
+
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string)?.trim() || '';
 
 export const isSupabaseConfigured = Boolean(
   supabaseUrl && 
   supabaseAnonKey && 
-  !supabaseUrl.includes('placeholder')
+  !supabaseUrl.includes('placeholder') &&
+  !supabaseUrl.includes('your-project')
 );
 
 export const supabase = isSupabaseConfigured 
