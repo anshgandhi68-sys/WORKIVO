@@ -43,7 +43,7 @@ export const Step4Payment: React.FC = () => {
   const [paymentErrorCode, setPaymentErrorCode] = useState<string | null>(null);
   const [activePaymentId, setActivePaymentId] = useState<string>('');
   const [customKey, setCustomKey] = useState<string>(
-    import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TO0Zvk3JDd91cP'
+    import.meta.env.VITE_RAZORPAY_KEY_ID || ''
   );
   const [showKeyConfig, setShowKeyConfig] = useState(false);
   const [showManualUpi, setShowManualUpi] = useState(false);
@@ -428,8 +428,25 @@ export const Step4Payment: React.FC = () => {
                       </div>
 
                       <p className="text-[10px] text-slate-500 leading-tight">
-                        * Razorpay Sandbox API (<code className="text-purple-800 font-bold">{customKey}</code>) automatically routes <strong className="text-purple-900">success@razorpay</strong> to instant verified status.
+                        * Razorpay Gateway {customKey ? (<code className="text-purple-800 font-bold">({customKey})</code>) : <span className="text-amber-600 font-semibold">(Waiting for API Key)</span>} automatically routes <strong className="text-purple-900">success@razorpay</strong> to verified status.
                       </p>
+
+                      {/* Optional Live Key Input if key not set in .env */}
+                      {!customKey && (
+                        <div className="mt-2 p-2.5 bg-amber-50/90 rounded-xl border border-amber-200 text-amber-900 space-y-1.5">
+                          <div className="flex items-center gap-1.5 text-[11px] font-bold">
+                            <Key className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                            <span>Paste Your Razorpay Key ID:</span>
+                          </div>
+                          <input
+                            type="text"
+                            value={customKey}
+                            onChange={(e) => setCustomKey(e.target.value.trim())}
+                            placeholder="rzp_test_..."
+                            className="w-full px-3 py-1.5 text-xs rounded-lg border border-amber-300 focus:outline-none focus:border-[#5415A0] bg-white font-mono"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

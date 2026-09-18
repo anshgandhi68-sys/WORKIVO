@@ -88,9 +88,14 @@ export const initiateRazorpayPayment = async ({
     return false;
   }
 
-  const key = customKey?.trim() || 
-    import.meta.env.VITE_RAZORPAY_KEY_ID || 
-    'rzp_test_TO0Zvk3JDd91cP';
+  const key = customKey?.trim() || import.meta.env.VITE_RAZORPAY_KEY_ID?.trim() || '';
+
+  if (!key) {
+    onError({
+      description: 'Razorpay API Key ID is not set. Please enter your Razorpay Key ID (rzp_test_... or rzp_live_...) to process payment.'
+    });
+    return false;
+  }
 
   // Razorpay requires amounts in Paise (₹1 = 100 Paise)
   const amountInPaise = Math.round(amount * 100);
