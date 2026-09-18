@@ -2,10 +2,16 @@
   "name": "workivo-workspace",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
     "postinstall": "npm --prefix frontend install",
     "dev": "npm --prefix frontend run dev",
     "build": "npm --prefix frontend install && npm --prefix frontend run build",
     "preview": "npm --prefix frontend run preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
   }
 }
