@@ -94,12 +94,12 @@ export const AuthModal: React.FC = () => {
     }
   };
 
-  const handleFillDemo = (demoType: 'ansh' | 'ravi') => {
-    if (demoType === 'ansh') {
+  const handleFillDemo = (demoType: 'ansh-client' | 'ansh-worker') => {
+    if (demoType === 'ansh-client') {
       setEmail('ansh@workivo.coop');
       setPassword('password123');
     } else {
-      setEmail('ravi.kumar@workivo.coop');
+      setEmail('ansh.gandhi@workivo.coop');
       setPassword('password123');
     }
     setErrorMsg(null);
@@ -370,17 +370,17 @@ export const AuthModal: React.FC = () => {
                   <div className="flex gap-1.5">
                     <button
                       type="button"
-                      onClick={() => handleFillDemo('ansh')}
+                      onClick={() => handleFillDemo('ansh-client')}
                       className="px-2 py-0.5 bg-white hover:bg-purple-100 text-[#5415A0] border border-purple-200 font-bold rounded text-[10px] transition-colors"
                     >
                       Ansh (Client)
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleFillDemo('ravi')}
+                      onClick={() => handleFillDemo('ansh-worker')}
                       className="px-2 py-0.5 bg-white hover:bg-purple-100 text-[#5415A0] border border-purple-200 font-bold rounded text-[10px] transition-colors"
                     >
-                      Ravi (Worker)
+                      Ansh G. (Worker)
                     </button>
                   </div>
                 </div>

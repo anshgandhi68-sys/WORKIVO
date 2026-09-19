@@ -36,7 +36,7 @@ export const MemberDirectoryPage: React.FC<MemberDirectoryPageProps> = ({
   const MEMBERS = [
     {
       id: 'm1',
-      name: 'Ravi Kumar',
+      name: 'Ansh Gandhi',
       verified: true,
       employment: 'Verified Co-owner • Full-time',
       availability: 'Available Now',

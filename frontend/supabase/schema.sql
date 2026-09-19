@@ -92,7 +92,7 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO workers (id, name, title, guild_partner, rating, review_count, jobs_done, experience_years, distance_km, hub_location, skills, earliest_slot_text, hourly_rate, badge_text)
 VALUES
-('ravi-kumar', 'Ravi Kumar', 'Master Electrician', 'Guild Equity Partner #408', 4.8, 142, 318, 9, 2.4, 'Bengaluru Hub #408', ARRAY['Inverter', 'Tripping', 'Industrial Relays'], 'Tomorrow 8:00 AM', 450, 'Selected Co-owner'),
+('ansh-gandhi', 'Ansh Gandhi', 'Master Electrician', 'Guild Equity Partner #408', 4.8, 142, 318, 9, 2.4, 'Bengaluru Hub #408', ARRAY['Inverter', 'Tripping', 'Industrial Relays'], 'Tomorrow 8:00 AM', 450, 'Selected Co-owner'),
 ('priya-sunder', 'Priya Sunder', 'Electrical Engineer', 'Guild Equity Partner #312', 4.9, 98, 210, 7, 3.8, 'Indiranagar Hub', ARRAY['Phase Balancing', 'Circuit Safety'], 'Tomorrow 9:30 AM', 480, 'Co-owner Member'),
 ('amitav-ghosh', 'Amitav Ghosh', 'Senior Wireman', 'Inverter & Heavy Load Specialist', 4.7, 118, 415, 12, 5.1, 'Koramangala Hub', ARRAY['Heavy Inverter', 'Copper Conduit'], 'Tomorrow 7:00 AM', 440, 'Senior Co-owner')
 ON CONFLICT (id) DO NOTHING;

@@ -52,12 +52,12 @@ const DEFAULT_DEMO_USERS: User[] = [
   },
   {
     id: 'usr_demo_2',
-    name: 'Ravi Kumar',
-    email: 'ravi.kumar@workivo.coop',
+    name: 'Ansh Gandhi',
+    email: 'ansh.gandhi@workivo.coop',
     phone: '+91 9876543210',
     password: 'password123',
     role: 'worker',
-    avatarInitials: 'RK',
+    avatarInitials: 'AG',
     createdAt: new Date().toISOString()
   }
 ];

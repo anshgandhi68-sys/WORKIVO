@@ -549,7 +549,7 @@ export const EarningsLedgerPage: React.FC<EarningsLedgerPageProps> = ({
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
               <div>
                 <span className="text-xs font-bold text-slate-900 block">Enable 1-Click UPI Payouts</span>
-                <span className="text-[11px] text-slate-500 block">Transfers to ravi.kumar@okhdfc</span>
+                <span className="text-[11px] text-slate-500 block">Transfers to ansh.gandhi@okhdfc</span>
               </div>
               <button
                 onClick={() => setUpiPayoutEnabled(!upiPayoutEnabled)}

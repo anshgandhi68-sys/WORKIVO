@@ -10,7 +10,7 @@ export const NominateApprenticeModal: React.FC<NominateApprenticeModalProps> = (
   const [name, setName] = useState('');
   const [trade, setTrade] = useState('Electrical');
   const [experience, setExperience] = useState('1-2 years');
-  const [mentor, setMentor] = useState('Ravi Kumar (Hub #408)');
+  const [mentor, setMentor] = useState('Ansh Gandhi (Hub #408)');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   if (!isOpen) return null;

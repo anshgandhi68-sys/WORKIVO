@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { 
   Calendar, 
   Wallet, 
@@ -39,6 +40,15 @@ export const WorkerDashboardPage: React.FC<WorkerDashboardPageProps> = ({
   const [radarActive, setRadarActive] = useState(true);
   const [selectedBrief, setSelectedBrief] = useState<string | null>(null);
 
+  const { currentUser } = useAuth();
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
   const handleOpenMaps = (address: string) => {
     window.open(`https://maps.google.com/?q=${encodeURIComponent(address)}`, '_blank');
   };
@@ -55,7 +65,7 @@ export const WorkerDashboardPage: React.FC<WorkerDashboardPageProps> = ({
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Good morning, Ravi.
+              {getGreeting()}.
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 flex flex-wrap items-center gap-2 mt-1">
               <span className="font-semibold text-slate-800">Bengaluru Central Guild #408</span>
@@ -520,7 +530,7 @@ export const WorkerDashboardPage: React.FC<WorkerDashboardPageProps> = ({
                   <span className="w-2.5 h-2.5 rounded-full bg-[#5415A0]" />
                   <div>
                     <span className="font-bold text-slate-900 block">Direct Worker Dividend (85%)</span>
-                    <span className="text-[10px] text-slate-500">Dispatched straight to Ravi's registered account</span>
+                    <span className="text-[10px] text-slate-500">Dispatched straight to Ansh's registered account</span>
                   </div>
                 </div>
                 <span className="font-extrabold text-slate-900">₹24,182.50</span>

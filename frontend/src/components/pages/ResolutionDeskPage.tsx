@@ -102,7 +102,7 @@ export const ResolutionDeskPage: React.FC<ResolutionDeskPageProps> = ({
             <User className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
             <div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Original Artisan</span>
-              <span className="text-xs font-bold text-slate-900 block mt-0.5">Ravi Kumar</span>
+              <span className="text-xs font-bold text-slate-900 block mt-0.5">Ansh Gandhi</span>
               <span className="text-[10px] text-rose-600 font-semibold">Emergency tool repair at Guild #408</span>
             </div>
           </div>
@@ -395,7 +395,7 @@ export const ResolutionDeskPage: React.FC<ResolutionDeskPageProps> = ({
           <button
             onClick={() => {
               if (confirm("Cancel this booking? Your ₹1 escrow deposit will be reversed instantly to your UPI account.")) {
-                alert("Escrow deposit reversed (₹1.00 refunded via UPI: ravi.coop@oksbi).");
+                alert("Escrow deposit reversed (₹1.00 refunded via UPI: ansh.coop@oksbi).");
                 onBackToBookings();
               }
             }}

@@ -353,7 +353,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             { id: 'home', label: 'Home' },
             { id: 'services', label: 'Services Catalog' },
             { id: 'bookings', label: '5-Step Booking Wizard' },
-            { id: 'artisan-profile', label: 'Artisan Profile (Ravi Kumar)' },
+            { id: 'artisan-profile', label: 'Artisan Profile (Ansh Gandhi)' },
             { id: 'resolution', label: 'Resolution Desk (Worker Replacement)' },
           ] : [
             { id: 'worker-dashboard', label: 'Daily Dispatch Dashboard' },

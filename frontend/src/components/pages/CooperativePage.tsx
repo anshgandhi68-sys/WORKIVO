@@ -400,7 +400,7 @@ export const CooperativePage: React.FC<CooperativePageProps> = ({
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
-            { name: 'Ravi K.', role: 'Electrician', rating: '4.96 (312)', isYou: true, img: 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=120&auto=format&fit=crop&q=80' },
+            { name: 'Ansh G.', role: 'Electrician', rating: '4.96 (312)', isYou: true, img: 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=120&auto=format&fit=crop&q=80' },
             { name: 'Priya S.', role: 'Lead Wireman', rating: '4.99 (540)', isYou: false, img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80' },
             { name: 'Amitav G.', role: 'Plumbing Master', rating: '4.92 (218)', isYou: false, img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80' },
             { name: 'Meena S.', role: 'HVAC Spec', rating: '4.98 (100)', isYou: false, img: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=120&auto=format&fit=crop&q=80' },

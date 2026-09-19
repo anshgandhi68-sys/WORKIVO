@@ -471,9 +471,9 @@ export const WORKERS: Worker[] = [
 
   // --- Electrical Artisans ---
   {
-    id: 'ravi-kumar',
-    name: 'Ravi Kumar',
-    initials: 'RK',
+    id: 'ansh-gandhi',
+    name: 'Ansh Gandhi',
+    initials: 'AG',
     title: 'Master Electrician',
     tradeCategory: 'electrical',
     guildPartner: 'Guild Equity Partner #408',

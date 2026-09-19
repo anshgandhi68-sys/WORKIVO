@@ -67,7 +67,7 @@ export const ArtisanProfilePage: React.FC<ArtisanProfilePageProps> = ({
             Electrical & Power Guild
           </span>
           <span>›</span>
-          <span className="text-slate-900 font-bold">Ravi Kumar</span>
+          <span className="text-slate-900 font-bold">Ansh Gandhi</span>
         </div>
 
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-50 border border-purple-100 text-[#5415A0] text-xs font-semibold">
@@ -85,7 +85,7 @@ export const ArtisanProfilePage: React.FC<ArtisanProfilePageProps> = ({
             <div className="relative">
               <img 
                 src="https://images.unsplash.com/photo-1540569014015-19a7be504e3a?auto=format&fit=crop&w=300&q=80" 
-                alt="Ravi Kumar"
+                alt="Ansh Gandhi"
                 className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover ring-4 ring-purple-100 shadow-md"
               />
               <div 
@@ -99,7 +99,7 @@ export const ArtisanProfilePage: React.FC<ArtisanProfilePageProps> = ({
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                  Ravi Kumar
+                  Ansh Gandhi
                 </h1>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-[#5415A0] border border-purple-200">
                   <Sparkles className="w-3 h-3 text-[#5415A0]" />
@@ -153,7 +153,7 @@ export const ArtisanProfilePage: React.FC<ArtisanProfilePageProps> = ({
               className="w-full py-3 px-4 rounded-xl bg-[#5415A0] hover:bg-[#430E7E] text-white font-bold text-sm shadow-md shadow-purple-900/10 transition-all flex items-center justify-center gap-2 group cursor-pointer"
             >
               <Calendar className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              <span>Book Ravi</span>
+              <span>Book Ansh</span>
             </button>
 
             <div className="flex items-center gap-2">
@@ -242,14 +242,14 @@ export const ArtisanProfilePage: React.FC<ArtisanProfilePageProps> = ({
         {/* Left Column (8 cols): Bio, Services, Guild Bond, Reviews */}
         <div className="lg:col-span-8 space-y-6">
           
-          {/* Card 1: About Ravi & Guild Apprenticeship */}
+          {/* Card 1: About Ansh & Guild Apprenticeship */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-purple-50 text-[#5415A0] flex items-center justify-center">
                   <Award className="w-4 h-4" />
                 </div>
-                <h2 className="text-lg font-bold text-slate-900">About Ravi & Guild Apprenticeship</h2>
+                <h2 className="text-lg font-bold text-slate-900">About Ansh & Guild Apprenticeship</h2>
               </div>
               <span className="text-[11px] font-bold text-purple-700 bg-purple-50 border border-purple-100 px-2.5 py-1 rounded-full">
                 Co-owner Member since 2021
@@ -257,7 +257,7 @@ export const ArtisanProfilePage: React.FC<ArtisanProfilePageProps> = ({
             </div>
 
             <p className="text-sm text-slate-600 leading-relaxed">
-              Ravi completed his 4-year rigorous industrial apprenticeship under the Karnataka Guild of Electricians with 
+              Ansh completed his 4-year rigorous industrial apprenticeship under the Karnataka Guild of Electricians with 
               distinction, specializing in smart grid distribution and high-capacity residential surges. As an equity partner 
               at WORKIVO Bengaluru Guild #408, every project he executes carries complete guild-backed liability protection 
               and transparent non-predatory hourly pricing.
@@ -517,7 +517,7 @@ export const ArtisanProfilePage: React.FC<ArtisanProfilePageProps> = ({
                   <span className="text-slate-400 text-[11px]">3 days ago</span>
                 </div>
                 <p className="text-xs text-slate-600 italic leading-relaxed pt-1">
-                  "Ravi arrived precisely at the booked hour with his guild toolkit. Diagnosed a faulty bypass switch within 10 minutes instead of selling me an expensive new inverter like commercial agencies tried to. Relief is real!"
+                  "Ansh arrived precisely at the booked hour with his guild toolkit. Diagnosed a faulty bypass switch within 10 minutes instead of selling me an expensive new inverter like commercial agencies tried to. Relief is real!"
                 </p>
               </div>
 
